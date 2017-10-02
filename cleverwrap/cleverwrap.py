@@ -70,21 +70,21 @@ class CleverWrap:
         """
 
         # try a maximum of twice to get the response
-        retry = True
+        retry, reset = True, False
         
         while(retry):
+            retry = False
             try:
                 r = requests.get(self.url, params=params)
                 result = r.json()
-                retry = False
             # catch errors, print then exit.
             except requests.exceptions.RequestException as e:
                 print(e)
-
             except ValueError as err:
                 # account for issue #12
                 self.reset()
-                retry = True
+                if not reset:
+                    reset = retry = True
             
         return result
 
