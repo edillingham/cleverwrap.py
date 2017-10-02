@@ -68,14 +68,25 @@ class CleverWrap:
         :type params: dict
         Returns: dict
         """
-        # Get a response
-        try:
-            r = requests.get(self.url, params=params)
-        # catch errors, print then exit.
-        except requests.exceptions.RequestException as e:
-            print(e)
-        return r.json()
 
+        # try a maximum of twice to get the response
+        retry = True
+        
+        while(retry):
+            try:
+                r = requests.get(self.url, params=params)
+                result = r.json()
+                retry = False
+            # catch errors, print then exit.
+            except requests.exceptions.RequestException as e:
+                print(e)
+
+            except ValueError as err:
+                # account for issue #12
+                self.reset()
+                retry = True
+            
+        return result
 
     def _process_reply(self, reply):
         """ take the cleverbot.com response and populate properties. """
